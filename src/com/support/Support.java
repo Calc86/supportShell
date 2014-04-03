@@ -1,11 +1,9 @@
 package com.support;
 
-import com.net.Server;
 import com.ui.console.ConsoleMessageShower;
 import com.ui.console.EStyle;
 import com.ui.console.Input;
 import com.ui.console.MessageShower;
-import com.user.User;
 
 import java.io.IOException;
 

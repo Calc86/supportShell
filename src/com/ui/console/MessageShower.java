@@ -4,16 +4,12 @@ import com.ui.IMessageShower;
 
 /**
  * Created by calc on 02.04.14.
+ *
  */
 public abstract class MessageShower implements IMessageShower {
     private String message;
 
-    public MessageShower(String message) {
-        this.message = message;
-    }
-
     protected MessageShower() {
-        this("");
     }
 
     public String getMessage() {

@@ -2,8 +2,8 @@ package com.ui.console;
 
 public class ConsoleMessageShower extends MessageShower{
     public ConsoleMessageShower() {
-        Environment e = new Environment();
-        e.setEncoding();
+        //Environment e = new Environment();
+        //e.setEncoding();
     }
 
     @Override

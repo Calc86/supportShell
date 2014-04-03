@@ -1,5 +1,6 @@
-package com.net;
+package com.support;
 
+import com.net.RowHttp;
 import com.support.Support;
 import com.ui.console.EStyle;
 import com.ui.console.Input;
@@ -12,12 +13,10 @@ import java.io.IOException;
  * Support side
  */
 public class Server {
-    private int id = 0;
     private String command = "";
     private final MessageShower ms;
     private final Input input;
-    private final Http http = new Http();
-    private Row row = new Row();
+    private RowHttp row = new RowHttp();
 
     public Server() {
         ms = Support.getInstance().getMs();
@@ -27,9 +26,9 @@ public class Server {
     public boolean use(int id){
         if(id == 0) return false;
 
-        this.id = id;
-        row = http.getRow(id);
-        if(row == null) return false;
+        row.setId(id);
+        row.load();
+        if(row.getId() == 0) return false;
 
         work();
 
@@ -38,11 +37,11 @@ public class Server {
 
     private void close(){
         row.setClosed(true);
-        http.setRow(row);
+        row.save();
     }
 
     private void hello(){
-        ms.setMessage("(" + id + ") > ").print();
+        ms.setMessage("(" + row.getId() + ") > ").print();
     }
 
     private void work(){
@@ -64,7 +63,7 @@ public class Server {
             ms.setMessage("Выполняем: " + command).show();
             row.setCmd(command);
             row.setCmdDone(false);
-            http.setRow(row);
+            row.save();
 
             while(true){
                 try {
@@ -72,12 +71,9 @@ public class Server {
                 } catch (InterruptedException e) {
                     //
                 }
-                Row newRow = http.getRow(row.getId());
-                if(newRow != null){
-                    row = newRow;
-                    if(row.isCmdDone())
-                        break;
-                }
+                row.load();
+                if(row.isCmdDone())
+                    break;
             }
 
             ms.setMessage("Результат: ").show();

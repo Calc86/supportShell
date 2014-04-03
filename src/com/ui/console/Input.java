@@ -1,7 +1,6 @@
 package com.ui.console;
 
 import java.io.*;
-import java.util.Scanner;
 
 /**
  * Created by calc on 02.04.14.

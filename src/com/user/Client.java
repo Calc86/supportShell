@@ -1,22 +1,22 @@
-package com.net;
+package com.user;
 
+import com.net.RowHttp;
 import com.ui.IMessageShower;
-import com.ui.console.ConsoleMessageShower;
 import com.ui.console.EStyle;
-import com.ui.console.MessageShower;
+import com.ui.console.Environment;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 
 /**
  * Created by calc on 02.04.14.
  *
  */
 public class Client {
-    private final Http http = new Http();
     private int id;
-    private Row row;
+    private RowHttp row = new RowHttp();
     private final IMessageShower ms;
 
     public Client(IMessageShower ms) {
@@ -24,12 +24,12 @@ public class Client {
     }
 
     public void create(){
-        row = http.getRow(0);
+        row.load();
         id = row.getId();
     }
 
     public String shellExec(String command){
-        Process p = null;
+        Process p;
         try {
             p = Runtime.getRuntime().exec(command);
         } catch (IOException e) {
@@ -45,7 +45,13 @@ public class Client {
         }
 
         BufferedReader reader =
-                new BufferedReader(new InputStreamReader(p.getInputStream()));
+                null;
+        try {
+            reader = new BufferedReader(new InputStreamReader(p.getInputStream(), Environment.getEncoding()));
+        } catch (UnsupportedEncodingException e) {
+            ms.setMessage("encoding " + Environment.getEncoding() + " not supported");
+            reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
+        }
 
         String line = "";
         StringBuilder sb = new StringBuilder();
@@ -71,7 +77,7 @@ public class Client {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            row = http.getRow(id);
+            row.load();
             if(row == null) System.out.print(".");
             else{
                 if(row.isClosed()) break;
@@ -82,7 +88,7 @@ public class Client {
                     ms.setMessage("Результат:").show();
                     ms.setMessage(row.getCmdReturn()).show();
                     row.setCmdDone(true);
-                    http.setRow(row);
+                    row.save();
                 }
             }
         }

@@ -9,6 +9,7 @@ import java.io.UnsupportedEncodingException;
  */
 public class Environment {
     public Environment() {
+
     }
 
     private static String getOsName(){
@@ -31,6 +32,11 @@ public class Environment {
         return System.getProperty("os.version");
     }
 
+    public static String getEncoding(){
+        if(Environment.isWin()) return "Cp866";
+        else return "UTF-8";
+    }
+
     public void setEncoding(){
         String encoding = "cp1251";
 
@@ -41,13 +47,14 @@ public class Environment {
 
         try{
             System.setOut(new PrintStream(System.out, true, encoding));
+            System.out.println("set " + encoding);
         }catch (UnsupportedEncodingException e){
-            //
+            System.out.println("error set encoding " + e.getMessage());
         }
         try{
             System.setErr(new PrintStream(System.out, true, encoding));
         }catch (UnsupportedEncodingException e){
-            //
+            System.out.println("error set encoding " + e.getMessage());
         }
     }
 }

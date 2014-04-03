@@ -2,6 +2,7 @@ package com.ui.console;
 
 /**
  * Created by calc on 02.04.14.
+ *
  */
 public enum EStyle {
 

@@ -1,8 +1,5 @@
 package com.user;
 
-import com.net.Client;
-import com.ui.console.ConsoleMessageShower;
-import com.ui.console.MessageShower;
 import com.ui.gui.UserForm;
 
 import javax.swing.*;

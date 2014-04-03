@@ -1,30 +1,40 @@
 package com.net;
 
+import com.ui.console.Environment;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.net.URLEncoder;
 
 /**
  * Created by calc on 03.04.14.
+ *
  */
 public class RowHttp extends Row{
-    private final String baseUrl = "http://clsupport.xsrv.su/supportShell/cmd.php?";
-    @Override
+    private final String baseUrl = "http://clsupport.xsrv.su/supportShell/cmd.php?l=1";
+
     public void load() {
-        super.load();
+        getRow();
     }
 
-    @Override
     public void save() {
-        super.save();
+        setRow();
     }
 
-    private URL createURL(String url){
-        url = url + "&rand=" + (int)(Math.random() * 10000);
+    private URL createURL(boolean isSet){
+        String url = baseUrl;
+        if(isSet){
+            url = url + toString()  + "&do=1";
+        }
+        url = url + "&id=" + getId() + "&rand=" + (int)(Math.random() * 10000);
+
         //System.out.println(url);
+
         try {
             return new URL(url);
         } catch (MalformedURLException e) {
@@ -32,8 +42,8 @@ public class RowHttp extends Row{
         }
     }
 
-    private Row getRow(int id){
-        URL url = createURL(baseUrl + "id=" + id);
+    private void getRow(){
+        URL url = createURL(false);
 
         URLConnection connection;
         try {
@@ -41,44 +51,53 @@ public class RowHttp extends Row{
         } catch (IOException e) {
             throw new NetException("error openConnection: " + e.getMessage());
         }
-        BufferedReader reader;
 
+        BufferedReader reader;
         try {
             reader = new BufferedReader(
-                    new InputStreamReader(connection.getInputStream()));
+                    new InputStreamReader(connection.getInputStream(), "UTF-8"));
         } catch (IOException e) {
             throw new NetException("error getInputStream" + e.getMessage());
         }
 
-        Row row = new Row();
         String line;
         try {
             //1
             line = reader.readLine();
-            if(line.compareTo("error") == 0)
-                return null;
-            row.setId(Integer.parseInt(line));
-            row.setClosed(Boolean.parseBoolean(reader.readLine())); //2
-            row.setCmdDone(Boolean.parseBoolean(reader.readLine()));    //3
-            row.setCmd(reader.readLine());  //4
+            if(line.compareTo("error") == 0) return;
+            if(getId() == 0) setId(Integer.parseInt(line)); //устанавливаем только в том случае, если ID = 0
+            setClosed(Boolean.parseBoolean(reader.readLine())); //2
+            setCmdDone(Boolean.parseBoolean(reader.readLine()));    //3
+            setCmd(reader.readLine());  //4
             String result = "";
             while((line = reader.readLine()) != null){
                 result += line + "\n";
             }
-            row.setCmdReturn(result);  //5
+            setCmdReturn(result);  //5
         } catch (IOException e) {
             throw new NetException("error parse Row" + e.getMessage());
         }
-
-        return row;
     }
 
-    private void setRow(Row row){
-        URL url = createURL(baseUrl + row + "&do=1");
+    private void setRow(){
+        URL url = createURL(true);
         try {
             url.getContent();
         } catch (IOException e) {
             //а хз что делать
+        }
+    }
+
+    @Override
+    public String toString() {
+        try {
+            return /*"id=" + id +*/
+                    "&closed=" + isClosed() +
+                            "&cmd_done=" + isCmdDone() +
+                            "&cmd=" + URLEncoder.encode(getCmd(), "UTF-8") +
+                            "&cmd_ret=" + URLEncoder.encode(getCmdReturn(),"UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            throw new NetException(e.getMessage());
         }
     }
 }

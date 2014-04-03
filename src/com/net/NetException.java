@@ -2,6 +2,7 @@ package com.net;
 
 /**
  * Created by calc on 02.04.14.
+ *
  */
 public class NetException extends RuntimeException {
     public NetException() {

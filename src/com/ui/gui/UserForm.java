@@ -4,7 +4,6 @@ import com.ui.IMessageShower;
 import com.ui.console.EStyle;
 
 import javax.swing.*;
-import java.awt.*;
 
 /**
  * Created by calc on 03.04.14.
@@ -24,7 +23,7 @@ public class UserForm implements IMessageShower{
     public static void main(String[] args) {
         JFrame frame = new JFrame("UserForm");
         frame.setContentPane(new UserForm().panel);
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         frame.pack();
         frame.setVisible(true);
     }
