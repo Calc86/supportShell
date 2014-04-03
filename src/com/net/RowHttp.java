@@ -55,7 +55,7 @@ public class RowHttp extends Row{
         BufferedReader reader;
         try {
             reader = new BufferedReader(
-                    new InputStreamReader(connection.getInputStream(), "UTF-8"));
+                    new InputStreamReader(connection.getInputStream(), "UTF-8"));   //читаем в UTF-8
         } catch (IOException e) {
             throw new NetException("error getInputStream" + e.getMessage());
         }
