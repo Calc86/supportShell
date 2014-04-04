@@ -58,12 +58,12 @@ public class RowHttp extends Row{
         String response = getResponse(connection);
         if(response == null) return false;
         ByteArrayInputStream stream;
-        try {
+        /*try {
             stream = new ByteArrayInputStream(response.getBytes("UTF-8"));
         } catch (UnsupportedEncodingException e) {
-            System.out.println("Кодировка UTF-8 не поддерживается");
+            System.out.println("Кодировка UTF-8 не поддерживается");*/
             stream = new ByteArrayInputStream(response.getBytes());
-        }
+        //}
 
         BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
 
