@@ -1,11 +1,6 @@
 package com.net;
 
-import com.ui.console.Environment;
-
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
@@ -16,57 +11,69 @@ import java.net.URLEncoder;
  *
  */
 public class RowHttp extends Row{
-    private final String baseUrl = "http://clsupport.xsrv.su/supportShell/cmd.php?l=1";
+    private final String baseUrl = "http://clsupport.xsrv.su/supportShell/cmd_post.php?l=1";
 
-    public void load() {
-        getRow();
+    public boolean load() {
+        return getRow();
     }
 
-    public void save() {
-        setRow();
+    public boolean save() {
+        return setRow();
     }
 
-    private URL createURL(boolean isSet){
-        String url = baseUrl;
-        if(isSet){
-            url = url + toString()  + "&do=1";
-        }
-        url = url + "&id=" + getId() + "&rand=" + (int)(Math.random() * 10000);
-
-        //System.out.println(url);
+    private URL createURL(){
+        String url = baseUrl + "&id=" + getId() + "&rand=" + (int)(Math.random() * 10000);
 
         try {
             return new URL(url);
         } catch (MalformedURLException e) {
-            throw new NetException("MalformedURLException" + e.getMessage());
+            System.out.println(e.getMessage());
+            return null;
         }
     }
 
-    private void getRow(){
-        URL url = createURL(false);
-
+    private URLConnection createUrlConnection(URL url, boolean isPost){
         URLConnection connection;
         try {
             connection = url.openConnection();
         } catch (IOException e) {
-            throw new NetException("error openConnection: " + e.getMessage());
+            System.out.println(e.getMessage());
+            return null;
+        }
+        if(isPost){
+            connection.setDoOutput(true);
+            connection.setRequestProperty("Accept-Charset", "UTF-8");
+            connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded;charset=UTF-8");
+        }
+        return connection;
+    }
+
+    private boolean getRow(){
+        URL url = createURL();
+        if(url == null) return false;
+
+        URLConnection connection = createUrlConnection(url, false);
+        if(connection == null) return false;
+
+        String response = getResponse(connection);
+        ByteArrayInputStream stream;
+        try {
+            stream = new ByteArrayInputStream(response.getBytes("UTF-8"));
+        } catch (UnsupportedEncodingException e) {
+            System.out.println("Кодировка UTF-8 не поддерживается");
+            stream = new ByteArrayInputStream(response.getBytes());
         }
 
-        BufferedReader reader;
-        try {
-            reader = new BufferedReader(
-                    new InputStreamReader(connection.getInputStream(), "UTF-8"));   //читаем в UTF-8
-        } catch (IOException e) {
-            throw new NetException("error getInputStream" + e.getMessage());
-        }
+        BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
 
         String line;
         try {
             //1
             line = reader.readLine();
-            if(line.compareTo("error") == 0) return;
-            if(getId() == 0) setId(Integer.parseInt(line)); //устанавливаем только в том случае, если ID = 0
+            if(line.compareTo("error") == 0) return false;
+            if(getId() == 0) setId(Integer.parseInt(line));  //устанавливаем только в том случае, если ID = 0
             setClosed(Boolean.parseBoolean(reader.readLine())); //2
+            setAccepted(Boolean.parseBoolean(reader.readLine()));
             setCmdDone(Boolean.parseBoolean(reader.readLine()));    //3
             setCmd(reader.readLine());  //4
             String result = "";
@@ -75,29 +82,84 @@ public class RowHttp extends Row{
             }
             setCmdReturn(result);  //5
         } catch (IOException e) {
-            throw new NetException("error parse Row" + e.getMessage());
+            System.out.println("Проблема парсинга ответа: " + e.getMessage());
+            return false;
+            //throw new NetException("error parse Row" + e.getMessage());
         }
+        return true;
     }
 
-    private void setRow(){
-        URL url = createURL(true);
+    private boolean setRow(){
+        URL url = createURL();
+        if(url == null) return false;
+
+        URLConnection connection = createUrlConnection(url, true);
+        if(connection == null) return false;
+        OutputStream output = null;
         try {
-            url.getContent();
+            output = connection.getOutputStream();
+            output.write(toString().getBytes("UTF-8"));
         } catch (IOException e) {
-            //а хз что делать
+            System.out.println(e.getMessage());
+            return false;
+            //throw new NetException(e.getMessage());
+        } finally {
+            try {
+                if(output != null)
+                    output.close();
+            } catch (IOException e) {
+                //ignore
+            }
         }
+        String response = getResponse(connection);
+        return response != null && response.compareTo("OK") == 0;
     }
+
+    private String getResponse(URLConnection connection){
+        String response = "";
+        BufferedReader reader;
+        try {
+            reader = new BufferedReader(new InputStreamReader(connection.getInputStream(),"UTF-8"));
+        } catch (IOException e) {
+            //throw new NetException(e.getMessage());
+            System.out.println(e.getMessage());
+            return null;
+        }
+
+        try {
+            String line;
+            while(( line = reader.readLine()) != null)
+                response = response + line + "\n";
+        } catch (IOException e) {
+            System.out.println(e.getMessage());
+            return null;
+        } finally {
+            try {
+                reader.close();
+            } catch (IOException e) {
+                //ignore
+            }
+        }
+        return response;
+    }
+
 
     @Override
     public String toString() {
         try {
             return /*"id=" + id +*/
-                    "&closed=" + isClosed() +
+                    "closed=" + isClosed() +
+                            "&cmd_accepted=" + isAccepted() +
                             "&cmd_done=" + isCmdDone() +
                             "&cmd=" + URLEncoder.encode(getCmd(), "UTF-8") +
-                            "&cmd_ret=" + URLEncoder.encode(getCmdReturn(),"UTF-8");
+                            "&cmd_ret=" + URLEncoder.encode(getCmdReturn(), "UTF-8");
         } catch (UnsupportedEncodingException e) {
-            throw new NetException(e.getMessage());
+            return /*"id=" + id +*/
+                    "closed=" + isClosed() +
+                            "&cmd_accepted=" + isAccepted() +
+                            "&cmd_done=" + isCmdDone() +
+                            "&cmd=" + getCmd() +
+                            "&cmd_ret=" + getCmdReturn();
         }
     }
 }

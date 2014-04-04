@@ -15,6 +15,8 @@ import java.io.UnsupportedEncodingException;
  *
  */
 public class Client {
+    public static final int WAIT = 500;
+    public static final int SHELL_TIMEOUT = 15 * 2;
     private int id;
     private RowHttp row = new RowHttp();
     private final IMessageShower ms;
@@ -29,6 +31,7 @@ public class Client {
     }
 
     public String shellExec(String command){
+        if(command == null) return "Нулевая команда";
         Process p;
         try {
             p = Runtime.getRuntime().exec(command);
@@ -38,14 +41,29 @@ public class Client {
             return "пустая команда";
         }
 
-        try {
-            p.waitFor();
-        } catch (InterruptedException e) {
+        /*try {*/
+        boolean timeout = false;
+            for (int i = 0; i <= SHELL_TIMEOUT; i++) {
+                try {
+                    Thread.sleep(WAIT);
+                    System.out.println(p.exitValue());
+                    break;
+                } catch (IllegalThreadStateException e) {
+                    System.out.print(".");
+                    if(i == SHELL_TIMEOUT) timeout = true;
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        p.destroy();
+        if(timeout)
+            return "timeout";
+            //p.waitFor();
+        /*} catch (InterruptedException e) {
             //
-        }
+        }*/
 
-        BufferedReader reader =
-                null;
+        BufferedReader reader;
         try {
             reader = new BufferedReader(new InputStreamReader(p.getInputStream(), Environment.getEncoding()));
         } catch (UnsupportedEncodingException e) {
@@ -73,15 +91,18 @@ public class Client {
 
         while(true){
             try {
-                Thread.sleep(1000);
+                Thread.sleep(WAIT);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
             row.load();
+
             if(row == null) System.out.print(".");
             else{
                 if(row.isClosed()) break;
                 if(!row.isCmdDone()){
+                    row.setAccepted(true);
+                    row.save();
                     ms.setMessage("Выполняем команду:").show();
                     ms.setMessage(row.getCmd()).show();
                     row.setCmdReturn(shellExec(row.getCmd()));

@@ -53,11 +53,12 @@ public class Support {
         ms.setMessage("    Support    ").header(EStyle.SHARP);
 
         while(true){
+            System.out.println("Введите номер подключения (0 or Enter для выхода): ");
             hello();
-            System.out.println("Введите номер подключения (-1 для выхода): ");
             int id = getID();
-            if(id == -1) break;
-            server.use(id);
+            if(id == 0) break;
+            if(!server.use(id))
+                ms.setMessage("Нет такого пользователя " + id).show();
         }
 
         ms.setMessage("Завершение работы").show();

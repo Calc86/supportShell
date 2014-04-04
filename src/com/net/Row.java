@@ -8,6 +8,7 @@ package com.net;
 public abstract class Row {
     private int id;
     private boolean isClosed = false;
+    private boolean isAccepted = true;
     private boolean isCmdDone = true;
     private String cmd = "";
     private String cmdReturn = "";
@@ -17,6 +18,14 @@ public abstract class Row {
     }
 
     public Row() {
+    }
+
+    public boolean isAccepted() {
+        return isAccepted;
+    }
+
+    public void setAccepted(boolean isAccepted) {
+        this.isAccepted = isAccepted;
     }
 
     public int getId() {
@@ -59,7 +68,7 @@ public abstract class Row {
         this.cmdReturn = cmdReturn;
     }
 
-    public abstract void save();
+    public abstract boolean save();
 
-    public abstract void load();
+    public abstract boolean load();
 }
