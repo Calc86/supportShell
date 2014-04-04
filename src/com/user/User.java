@@ -37,7 +37,7 @@ public class User {
     }
 
     private static void crateUserForm() {
-        frame = new JFrame("UserForm");
+        frame = new JFrame("Screen");
         form = new UserForm();
         frame.setContentPane(form.getPanel());
         frame.setPreferredSize(new Dimension(500,400));

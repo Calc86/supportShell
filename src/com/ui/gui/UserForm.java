@@ -11,7 +11,6 @@ import javax.swing.*;
  */
 public class UserForm implements IMessageShower{
     private String message;
-    private JTextField textID;
     private JTextPane textLog;
 
     public JPanel getPanel() {
