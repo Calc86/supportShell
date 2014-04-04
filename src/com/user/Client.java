@@ -5,10 +5,7 @@ import com.ui.IMessageShower;
 import com.ui.console.EStyle;
 import com.ui.console.Environment;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 
 /**
  * Created by calc on 02.04.14.
@@ -55,9 +52,10 @@ public class Client {
                     e.printStackTrace();
                 }
             }
-        p.destroy();
-        if(timeout)
+        if(timeout){
+            p.destroy();
             return "timeout";
+        }
             //p.waitFor();
         /*} catch (InterruptedException e) {
             //
