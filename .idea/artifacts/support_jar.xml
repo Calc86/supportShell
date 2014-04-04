@@ -1,6 +1,6 @@
 <component name="ArtifactManager">
   <artifact type="jar" build-on-make="true" name="support:jar">
-    <output-path>$PROJECT_DIR$/out/artifacts/support_jar</output-path>
+    <output-path>$PROJECT_DIR$/server/files</output-path>
     <root id="archive" name="support.jar">
       <element id="module-output" name="supportShell" />
       <element id="directory" name="META-INF">

