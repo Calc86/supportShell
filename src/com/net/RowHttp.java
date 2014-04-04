@@ -56,6 +56,7 @@ public class RowHttp extends Row{
         if(connection == null) return false;
 
         String response = getResponse(connection);
+        if(response == null) return false;
         ByteArrayInputStream stream;
         try {
             stream = new ByteArrayInputStream(response.getBytes("UTF-8"));
